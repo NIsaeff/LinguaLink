@@ -1,0 +1,37 @@
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    padding: 16px;
+    width: 180px;
+    margin: 0;
+    overflow: hidden;
+    position: fixed;
+    background-color: rgba(25, 25, 25, 0.8);
+    border-radius: 10px ;
+}
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: #fff;
+}
+select {
+    padding: 5px;
+    width: 80%;
+    border-radius: 10px;
+}
+h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.selection-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.loading-icon {
+  width: 20px;
+  height: 20px;
+}

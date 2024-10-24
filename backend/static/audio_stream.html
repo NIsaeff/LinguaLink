@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>WebSocket Audio Stream</title>
+</head>
+
+<body>
+  <h1>LinguaLink V0.1</h1>
+  <input type="text" id="messageText" placeholder="Enter message">
+  <button onclick="sendMessage()">Send</button>
+  <h2>Audio Streaming</h2>
+  <audio id="audioPlayer" controls autoplay></audio>
+
+  <script>
+    let textSocket = new WebSocket("ws://localhost:8000/ws");
+    let audioSocket = null;
+    let audioContext = null;
+    let bufferQueue = [];
+    let playing = false;  // Track if audio is currently playing
+
+    textSocket.onopen = function (e) {
+      console.log("[open] Text connection established");
+    };
+
+    textSocket.onmessage = function (event) {
+      console.log(`%c[message] Data received from server: ${event.data}`, "color: green");
+    };
+
+    function sendMessage() {
+      let message = document.getElementById("messageText").value;
+      console.log("[sendMessage] Sending message:", message);
+
+      textSocket.send(message);
+      startAudioSocket();
+    }
+
+    function startAudioSocket() {
+      // if audio socket (ws-audio) open then close before reopening
+      if (audioSocket !== null) {
+        audioSocket.close();
+      }
+
+      // initialize new websocket object
+      audioSocket = new WebSocket("ws://localhost:8000/ws-audio");
+
+      // 
+      audioSocket.onopen = function (e) {
+        console.log("[open] Audio connection established");
+        //
+        audioContext = new (window.AudioContext || window.webkitAudioContext)({
+          sampleRate: 44100  // Set sample rate to match the audio being generated
+        });
+        audioContext.resume().then(() => {
+          console.log("[audioContext] Resumed successfully");
+        });
+      };
+
+      audioSocket.onmessage = function (event) {
+        if (event.data instanceof Blob) {
+          console.log("[audioSocket] Received audio chunk (Blob), size:", event.data.size);
+          event.data.arrayBuffer().then(buffer => {
+            console.log("[audioSocket] Converting Blob to ArrayBuffer");
+            audioContext.decodeAudioData(buffer, function (decodedData) {
+              console.log("[audioSocket] Audio chunk decoded successfully, adding to queue. Duration:", decodedData.duration);
+              bufferQueue.push(decodedData);
+              playQueuedAudio();  // Check if enough audio is buffered to start playing
+            }, function (error) {
+              console.error("[audioSocket] Error decoding audio data:", error);
+            });
+          });
+        } else if (typeof event.data === "string") {
+          console.log(`[audioSocket] Message from server: ${event.data}`);
+          if (event.data === "Audio processing completed. Closing connection.") {
+            audioSocket.close();
+          }
+        }
+      };
+
+      audioSocket.onclose = function () {
+        console.log("[close] Audio connection closed");
+      };
+
+      audioSocket.onerror = function (err) {
+        console.error(`[error] WebSocket error: ${err.message}`);
+      };
+    }
+
+    function playQueuedAudio() {
+      // Ensure we have enough audio pre-buffered before starting playback
+      if (bufferQueue.length >= 3 && !playing) {  // Adjust the number as needed
+        console.log("[playQueuedAudio] Pre-buffered enough audio, starting playback");
+        playNextAudioBuffer();
+      } else if (bufferQueue.length < 3) {
+        console.log("[playQueuedAudio] Not enough audio buffered, waiting...");
+      }
+    }
+
+    function playNextAudioBuffer() {
+      if (bufferQueue.length > 0) {
+        console.log("[playNextAudioBuffer] Playing audio from queue");
+
+        let audioBuffer = bufferQueue.shift();
+        let bufferSource = audioContext.createBufferSource();
+        bufferSource.buffer = audioBuffer;
+        bufferSource.connect(audioContext.destination);
+
+        playing = true;
+
+        bufferSource.onended = function () {
+          console.log("[playNextAudioBuffer] Audio buffer ended, playing next");
+          playing = false;
+          playNextAudioBuffer();
+        };
+
+        if (audioContext.state === 'running') {
+          console.log("[playNextAudioBuffer] Starting audio buffer with duration:", audioBuffer.duration);
+          bufferSource.start(0);
+        } else {
+          console.log("[playNextAudioBuffer] Resuming audio context before starting buffer");
+          audioContext.resume().then(() => {
+            bufferSource.start(0);
+          });
+        }
+      } else {
+        console.log("[playNextAudioBuffer] No audio buffer in queue, waiting for more data");
+      }
+    }
+  </script>
+
+</html>

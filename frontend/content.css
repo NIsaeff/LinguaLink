@@ -1,0 +1,63 @@
+.translate-button-wrapper {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.translate-button{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 36px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.9;
+    transition: opacity 0.1s ease-in-out;
+    vertical-align: top;
+    position: relative;
+    top: 50%;
+    transform: translateY(-35%);
+}
+
+.translate-button:hover,
+.stop-button:hover {
+    opacity: 1;
+}
+
+.translate-button img {
+    width: 24px;
+    height: 24px;
+    filter: invert(1);
+}
+
+.stop-button img {
+    width: 24px;
+    height: 24px;
+    filter: invert(1);
+}
+
+.stop-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Match the height of the container */
+    width: 36px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.9;
+    transition: opacity 0.1s ease-in-out;
+    vertical-align: top;
+    position: relative;
+    top: 35%;
+    margin-right: 8px;
+}
+
+/* Specific styles for stop button */
+.stop-button {
+    display: none; /* Initially hidden */
+}
