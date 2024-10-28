@@ -47,7 +47,7 @@ async def websocket_text_endpoint(websocket: WebSocket):
 
 def calculate_audio_duration(audio_data: bytes, sample_rate: int = 44100) -> float:
     # Calculate duration from byte size and sample rate
-    num_samples = len(audio_data) // 2  # assuming 16-bit (2 bytes per sample)
+    num_samples = len(audio_data) // 4  # assuming 32-bit (4 bytes per sample)
     return num_samples / sample_rate
 
 @app.websocket("/ws-audio")

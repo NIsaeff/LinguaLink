@@ -88,10 +88,10 @@
 
     function playQueuedAudio() {
       // Ensure we have enough audio pre-buffered before starting playback
-      if (bufferQueue.length >= 3 && !playing) {  // Adjust the number as needed
+      if (bufferQueue.length >= 10 && !playing) {  // Adjust the number as needed
         console.log("[playQueuedAudio] Pre-buffered enough audio, starting playback");
         playNextAudioBuffer();
-      } else if (bufferQueue.length < 3) {
+      } else if (bufferQueue.length < 10) {
         console.log("[playQueuedAudio] Not enough audio buffered, waiting...");
       }
     }

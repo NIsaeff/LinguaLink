@@ -20,7 +20,7 @@ def validate_and_format_text(text: str) -> str:
     valid_text = re.sub(r'[^a-zA-Z0-9_\- ]', '', text)
     return valid_text
 
-async def process_audio_in_segments(text: str, segment_size: int = 9):
+async def process_audio_in_segments(text: str, segment_size: int = 12):
     try:
         # Validate and format text
         text = validate_and_format_text(text)
